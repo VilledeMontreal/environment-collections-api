@@ -6,7 +6,7 @@
 
 ## Template for README.md
 
-- Project description todo
+- Project description todo!
 
 ### Details
 
