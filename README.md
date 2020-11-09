@@ -3,7 +3,7 @@
 <a id='english-version' class='anchor' aria-hidden='true'/>
 
 # environment-collections-api
-The GAD system makes it possible to move away from paper and move to electronic deversal authorizations.
+The GAD system makes it possible to move away from paper and move to electronic disposal authorizations.
 
 For more information, consult [the documentation](https://villedemontreal.github.io/environment-collections-api/).
 
