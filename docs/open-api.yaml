@@ -1,0 +1,336 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0-beta.3
+  title: Ville de Montréal - Déversements
+servers:
+  - url: 'https://api.montreal.ca/api/environment/collections'
+paths:
+  /v1/disposal-authorizations:
+    get:
+      summary: Liste toutes les autorisations de déversement.
+      parameters:
+        - name: disposalSiteId
+          in: query
+          description: Filtre les autorisations de déversement par site de déversement.
+          required: true
+          schema:
+            type: string
+        - name: stateId
+          in: query
+          description: Filtre les autorisations de déversement par état. L'état 500 est le seul filtre possible pour l'instant, mais permet d'évoluer sans breaking change éventuellement.
+          example: 500 (à valider)
+          required: true
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Index du premier item à retourner (Défaut=0).
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          description: Nombre d'items maximal à retourner (Défaut=25).
+          required: false
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: Une liste paginée d'autorisations de déversement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedListOfDisposalAuthorization'
+        '401':
+          description: >2-
+             # Profil DisposalSite
+            - Si le filtre disposalSiteId ne correspond pas au API key
+
+            - Si le filtre stateId != 500(à valider)
+
+            # Tous les autres profils
+
+            - HTTP code 401 Unauthorized 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erreur du serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/v1/disposals':
+    post:
+      summary: Crée un nouveau déversement.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisposalInput'
+      responses:
+        '200':
+          description: Succès.
+        '401':
+          description: >2-
+             # Profil DisposalSite
+            - Si le disposalSiteId de l'authorisation de déversement ne correspond pas au API key
+            
+            # Tous les autres profils
+            
+            - HTTP code 401 Unauthorized 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Si l'authorisation de déversement n'est pas dans l'état 500 (à valider)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erreur du serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+  schemas:
+
+# *** Output Types ***
+
+    PagedListOfDisposalAuthorization:
+      description: Liste paginée d'autorisation de déversement
+      properties:
+        paging:
+          type: object
+          $ref: '#/components/schemas/Paging'
+        items:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/DisposalAuthorization'
+    Paging:
+      description: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          description: Index du premier item à retourner.
+          example: 0
+        limit:
+          type: integer
+          description: Nombre d'items maximal à retourner.
+          example: 25
+    DisposalAuthorization:
+      description: Autorisation de déversement
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id de l'autorisation de déversement.
+          example: an-opaque-id
+        authorizationNumber:
+          type: string
+          description: >-
+            Numéro d'autorisation émit par la Ville et confirmant que le
+            véhicule peut déverser son chargement au site de déversement.
+          example: OM-T-10-00251
+        state:
+          type: object
+          $ref: '#/components/schemas/DisposalAuthorizationState'
+        disposalSite:
+          type: object
+          $ref: '#/components/schemas/DisposalSite'
+        collection:
+          type: object
+          $ref: '#/components/schemas/Collection'
+    DisposalAuthorizationState:
+      description: |2
+        État de l'authorization de déversement. Un seul état possible pour l'instant:
+        - 500 (à valider)
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id de l'état
+          example: '500'
+        name:
+          type: string
+          description: Nom de l'état
+          example: à valider
+    DisposalSite:
+      description: Site de déversement
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id du site de déversement.
+          example: an-opaque-id
+        name:
+          type: string
+          description: Nom du site de déversement.
+          example: EBI
+    Collection:
+      description: Collecte
+      type: object
+      properties:
+        vehicle:
+          type: object
+          $ref: '#/components/schemas/Vehicle'      
+        type:
+          type: object
+          $ref: '#/components/schemas/CollectionType'
+        area:
+          type: object
+          $ref: '#/components/schemas/CollectionArea'
+    CollectionType:
+      description: Type de collecte
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id du type de collecte.
+          example: an-opaque-id
+        name:
+          type: string
+          description: Nom du type de collecte.
+          example: Ordures ménagères
+    CollectionArea:
+      description: Territoire de collecte
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id du territoire de collecte.
+          example: an-opaque-id
+        name:
+          type: string
+          description: Nom du territoire de collecte.
+          example: Côte-des-neiges
+    Vehicle:
+      description: Camion
+      type: object
+      properties:
+        company:
+          type: object
+          $ref: '#/components/schemas/Company'
+        number:
+          type: string
+          description: >-
+            Numéro du véhicule. Le numéro de véhicule est habituellement situé à
+            l'avant du véhicule. Ce numéro est unique pour une compagnie de
+            transport. À ne pas confondre avec l'immatriculation du véhicule.
+          example: '04'
+    Company:
+      description: Transporteur
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id de la compagnie de transport.
+          example: an-opaque-id
+        name:
+          type: string
+          description: Nom de la compagnie de transport.
+          example: Derichbourg
+
+# ***
+
+# *** Input Types ***
+
+    DisposalInput:
+      description: Déversement. Tous les poids doivent être en KG. Le terme français pour weightingBefore est pesée brute et celui pour weightingAfter est pesée tare.
+      type: object
+      required:
+        - disposalAuthorization
+        - weightingBefore
+        - weightingAfter
+      properties:
+        disposalAuthorization:
+          type: object
+          $ref: '#/components/schemas/EntityReferenceInput'
+        weightingBefore:
+          type: object
+          $ref: '#/components/schemas/WeightingInput'
+        weightingAfter:
+          type: object
+          $ref: '#/components/schemas/WeightingInput'
+    WeightingInput:
+      description: Pesée
+      type: object
+      required:
+        - createdAt
+        - weight
+      properties:
+        createdAt:
+          description: Date et heure à laquelle la pesée a été effectuée, en UTC au format ISO-8601.
+          type: string
+          format: datetime
+          example: "2017-09-26T17:20:30.000Z"
+        weight:
+          type: object
+          $ref: '#/components/schemas/IntegerMeasurementInput'
+    IntegerMeasurementInput:
+      description: Mesure (entier)
+      type: object
+      required:
+        - unit
+        - value
+      properties:
+        unit:
+          type: string
+          description: Le code de l'unité de mesure.
+          example: 'KG'              
+        value:
+          type: integer
+          description: La valeur de la mesure.
+          example: 5400
+    EntityReferenceInput:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Id de l'entité référencée.
+          example: 'an-opaque-id'
+# ***
+
+# *** Error Types ***
+    ErrorResponse:
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ApiError'
+    ApiError:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: >-
+            Code représentant l'erreur. Le client de l'API doit utiliser le code et non le message pour les 
+            instructions conditionnelles dans le traitement d'une erreur. Contrairement aux HTTP status code
+            qui sont génériques, les Api Error codes sont spécifiques à l'API. Ils permettent d'identifier
+            l'erreur lorsque plusieurs cas d'erreur correspondent au même HTTP status code.
+        message:
+          type: string
+          description: >-
+            Message en anglais décrivant l'erreur. Le message s'adresse aux
+            développeurs et non aux utilisateurs.       
+# ***
+
+security:
+  - ApiKeyAuth: []
