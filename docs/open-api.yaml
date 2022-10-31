@@ -235,6 +235,11 @@ components:
             l'avant du véhicule. Ce numéro est unique pour une compagnie de
             transport. À ne pas confondre avec l'immatriculation du véhicule.
           example: '04'
+        licensePlate:  
+          type: string
+          description: >-
+            La plaque d'immatriculation du véhicule incluant le préfixe (ex: L), en majuscule et sans espace.
+          example: 'L123456'
     Company:
       description: Transporteur
       type: object
