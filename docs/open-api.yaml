@@ -7,19 +7,19 @@ servers:
 paths:
   /v1/disposal-authorizations:
     get:
-      summary: Liste toutes les autorisations de déversement.
+      summary: Liste toutes les autorisations de déverser.
       tags:
         - Déversements
       parameters:
         - name: disposalSiteId
           in: query
-          description: Filtre les autorisations de déversement par site de déversement.
+          description: Filtre les autorisations de déverser par site de déversement.
           required: true
           schema:
             type: string
         - name: stateId
           in: query
-          description: Filtre les autorisations de déversement par état. L'état 500 est le seul filtre possible pour l'instant, mais permet d'évoluer sans breaking change éventuellement.
+          description: Filtre les autorisations de déverser par état. L'état 500 est le seul filtre possible pour l'instant, mais permet d'évoluer sans breaking change éventuellement.
           example: 500 (à valider)
           required: true
           schema:
@@ -40,7 +40,7 @@ paths:
             default: 25
       responses:
         '200':
-          description: Une liste paginée d'autorisations de déversement.
+          description: Une liste paginée d'autorisations de déverser.
           content:
             application/json:
               schema:
@@ -81,7 +81,7 @@ paths:
         '401':
           description: >2-
              # Profil DisposalSite
-            - Si le disposalSiteId de l'authorisation de déversement ne correspond pas au API key
+            - Si le disposalSiteId de l'autorisation de déverser ne correspond pas au API key
             
             # Tous les autres profils
             
@@ -91,7 +91,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
-          description: Si l'authorisation de déversement n'est pas dans l'état 500 (à valider)
+          description: Si l'autorisation de déverser n'est pas dans l'état 500 (à valider)
           content:
             application/json:
               schema:
@@ -113,7 +113,7 @@ components:
 # *** Output Types ***
 
     PagedListOfDisposalAuthorization:
-      description: Liste paginée d'autorisation de déversement
+      description: Liste paginée d'autorisations de déverser
       properties:
         paging:
           type: object
@@ -136,12 +136,12 @@ components:
           description: Nombre d'items maximal à retourner.
           example: 25
     DisposalAuthorization:
-      description: Autorisation de déversement
+      description: autorisation de déverser
       type: object
       properties:
         id:
           type: string
-          description: Id de l'autorisation de déversement.
+          description: Id de l'autorisation de déverser.
           example: an-opaque-id
         authorizationNumber:
           type: string
@@ -160,7 +160,7 @@ components:
           $ref: '#/components/schemas/Collection'
     DisposalAuthorizationState:
       description: |2
-        État de l'authorization de déversement. Un seul état possible pour l'instant:
+        État de l'autorisation de déverser. Un seul état possible pour l'instant:
         - 500 (à valider)
       type: object
       properties:
@@ -235,6 +235,11 @@ components:
             l'avant du véhicule. Ce numéro est unique pour une compagnie de
             transport. À ne pas confondre avec l'immatriculation du véhicule.
           example: '04'
+        licensePlate:  
+          type: string
+          description: >-
+            La plaque d'immatriculation du véhicule incluant le préfixe (ex: L), en majuscule et sans espace.
+          example: 'L123456'
     Company:
       description: Transporteur
       type: object
