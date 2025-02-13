@@ -1,25 +1,23 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0-beta.3
+  version: 1.0.0-beta.5
   title: Ville de Montréal - Déversements
 servers:
   - url: 'https://api.montreal.ca/api/environment/collections'
 paths:
   /v1/disposal-authorizations:
     get:
-      summary: Liste toutes les autorisations de déverser.
-      tags:
-        - Déversements
+      summary: Liste toutes les autorisations de déversement.
       parameters:
         - name: disposalSiteId
           in: query
-          description: Filtre les autorisations de déverser par site de déversement.
+          description: Filtre les autorisations de déversement par site de déversement.
           required: true
           schema:
             type: string
         - name: stateId
           in: query
-          description: Filtre les autorisations de déverser par état. L'état 500 est le seul filtre possible pour l'instant, mais permet d'évoluer sans breaking change éventuellement.
+          description: Filtre les autorisations de déversement par état. L'état 500 est le seul filtre possible pour l'instant, mais permet d'évoluer sans breaking change éventuellement.
           example: 500 (à valider)
           required: true
           schema:
@@ -40,7 +38,7 @@ paths:
             default: 25
       responses:
         '200':
-          description: Une liste paginée d'autorisations de déverser.
+          description: Une liste paginée d'autorisations de déversement.
           content:
             application/json:
               schema:
@@ -81,7 +79,7 @@ paths:
         '401':
           description: >2-
              # Profil DisposalSite
-            - Si le disposalSiteId de l'autorisation de déverser ne correspond pas au API key
+            - Si le disposalSiteId de l'authorisation de déversement ne correspond pas au API key
             
             # Tous les autres profils
             
@@ -91,7 +89,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '422':
-          description: Si l'autorisation de déverser n'est pas dans l'état 500 (à valider)
+          description: Si l'authorisation de déversement n'est pas dans l'état 500 (à valider)
           content:
             application/json:
               schema:
@@ -136,12 +134,12 @@ components:
           description: Nombre d'items maximal à retourner.
           example: 25
     DisposalAuthorization:
-      description: autorisation de déverser
+      description: Autorisation de déversement
       type: object
       properties:
         id:
           type: string
-          description: Id de l'autorisation de déverser.
+          description: Id de l'autorisation de déversement.
           example: an-opaque-id
         authorizationNumber:
           type: string
@@ -160,7 +158,7 @@ components:
           $ref: '#/components/schemas/Collection'
     DisposalAuthorizationState:
       description: |2
-        État de l'autorisation de déverser. Un seul état possible pour l'instant:
+        État de l'authorisation de déversement. Un seul état possible pour l'instant:
         - 500 (à valider)
       type: object
       properties:
@@ -191,6 +189,9 @@ components:
         vehicle:
           type: object
           $ref: '#/components/schemas/Vehicle'      
+        container:
+          type: object
+          $ref: '#/components/schemas/Container'      
         type:
           type: object
           $ref: '#/components/schemas/CollectionType'
@@ -240,6 +241,19 @@ components:
           description: >-
             La plaque d'immatriculation du véhicule incluant le préfixe (ex: L), en majuscule et sans espace.
           example: 'L123456'
+    Container:
+      description: Conteneur
+      type: object
+      properties:
+        company:
+          type: object
+          $ref: '#/components/schemas/Company'
+        number:
+          type: string
+          description: >-
+            Numéro du conteneur. Ce numéro est unique pour une compagnie de
+            transport.
+          example: '304-3980'
     Company:
       description: Transporteur
       type: object
